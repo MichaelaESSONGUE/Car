@@ -1,0 +1,183 @@
+---
+title: "Final Project"
+output:
+  pdf_document: default
+  html_document: default
+date: "2023-11-14"
+---
+
+Title: "Final Project"
+author: Sylvie Michaela Essongue
+
+---
+  
+  
+```{r}
+
+install.packages("dplyr")
+install.packages("ggplot2")
+install.packages("tidyverse")
+install.packages("lubridate")
+
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+library(lubridate)
+```
+
+```{r}
+library(readr)
+Electric_cars <- read_csv("C:/Users/micha/Downloads/ElectricCars (1).csv" )
+head(Electric_cars )
+#Handle missing values :mean, median, or other imputation methods 
+ Electric_cars$Price[is.na(Electric_cars$Price)] <- mean(Electric_cars$Price, na.rm = TRUE)
+ 
+
+Electric_cars$Battery_life <- parse_number(Electric_cars$Battery_life)
+
+```
+
+
+```{r}
+describe(Electric_cars)
+```
+
+```{r}
+
+multiple.regression <- lm(Price ~ .-Name, data = Electric_cars) 
+summary(multiple.regression)
+
+```
+
+
+```{r}
+## Random Forest Model
+
+install.packages("randomForest")
+library(randomForest)
+# import any character vectors as a factor (as a categorical variable)
+
+str(Electric_cars_F2)
+head(Electric_cars_F2)
+
+ # Create a binary target variable
+ Electric_cars_F2 <- Electric_cars_F2 %>% 
+  mutate(Affordability = if_else(Price>=53000, 1,0))
+
+
+ 
+# Train-Test Split
+
+library(rsample)
+set.seed(645)
+
+
+Car_split <- initial_split(Electric_cars_F2, prop = 0.7)
+
+Car_train <- training(Car_split)
+Car_test <- testing(Car_split)
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+
+## Ensemble of Trees
+
+library(rpart)
+library(rpart.plot)
+ 
+ 
+
+
+# Classification tree (Single Decision Tree)
+
+ 
+
+Car_dtree <- rpart(as.factor(Affordability)~. -Price -Name,  data = Car_train, method = "class")
+ 
+rpart.plot(Car_dtree, cex= 0.8)
+
+print(Car_dtree)
+
+
+ 
+
+## Random Forest Model
+
+install.packages("randomForest")
+library(randomForest)
+
+rf_car <- randomForest(as.factor(Affordability) ~ . - Price -Name, data = Car_train, ntree = 1000, importance=TRUE,na.action=na.omit)
+
+plot(rf_car)
+varImpPlot(rf_car)
+rf_car
+
+ 
+
+
+
+# For numeric (not factor) target variables, regression tree is assumed.
+
+ 
+
+ rf_model <- randomForest(as.factor(Affordability)~.-Price -Name , data = Car_train, ntree = 1000, importance=TRUE,na.action=na.omit )
+
+plot(rf_model)
+varImpPlot(rf_model)
+importance(rf_model)
+ 
+ 
+
+
+
+# Gradient Boosting Model
+
+install.packages("gbm")
+library(gbm)
+ 
+ 
+
+
+grade_gbm_reg <- gbm(as.factor(Affordability) ~ .-Price -Name, data = Car_train, distribution = "gaussian",  n.trees = 1000)
+
+summary(grade_gbm_reg)
+
+```
+
+
+```{r}
+#Electic_cars_filter <-filter(Electric_cars, Name %in% c ("Tesla", "BMW"))
+#Electic_cars_filter
+ 
+LogisticRegression <- glm(formula = Price ~ . - Name, data = Electric_cars_F3) 
+summary(LogisticRegression)
+
+```
+
+```{r}
+ggplot(Electric_cars, aes(x= TopSpeed, y=Price)) +
+geom_point() +
+geom_smooth(method="lm", se=FALSE)
+
+
+ggplot(Electric_cars, aes(x= Efficiency, y=Price)) +
+geom_point() +
+geom_smooth(method="lm", se=FALSE)
+
+
+
+ggplot(Electric_cars, aes(x= Range, y=Price)) +
+geom_point() +
+geom_smooth(method="lm", se=FALSE)
+
+ggplot(Electric_cars, aes(x= FastChargeSpeed, y=Price)) +
+geom_point() +
+geom_smooth(method="lm", se=FALSE)
+
+
+```
+
+
+ 
+
+
+
